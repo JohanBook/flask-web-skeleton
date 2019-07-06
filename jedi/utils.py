@@ -1,11 +1,11 @@
 import os
 import secrets
 
-from flask import url_for
+from flask import current_app, url_for
 from flask_mail import Message
 from PIL import Image
 
-from jedi import app, mail
+from jedi import mail
 
 
 def save_picture(
@@ -14,7 +14,7 @@ def save_picture(
     random_hex = secrets.token_hex(8)
     _, extension = os.path.splitext(form_picture.filename)
     filename = random_hex + extension
-    path = os.path.join(app.root_path, "static", directory, filename)
+    path = os.path.join(current_app.root_path, "static", directory, filename)
 
     img = Image.open(form_picture)
     if output_size:
