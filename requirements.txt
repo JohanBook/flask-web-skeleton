@@ -1,0 +1,8 @@
+flask
+flask-bcrypt
+flask-login
+flask-sqlalchemy
+flask-wtf
+numpy
+Pillow
+wtforms
