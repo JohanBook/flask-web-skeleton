@@ -61,13 +61,6 @@ class UpdateAccount(FlaskForm):
                 raise ValidationError(f"Email already in use")
 
 
-class AnalyzeForm(FlaskForm):
-    picture = FileField(
-        "Upload image", validators=[FileAllowed(["jpg", "png"])]
-    )
-    submit = SubmitField("Analyze")
-
-
 class RequestResetForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     submit = SubmitField("Request password reset")

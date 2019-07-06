@@ -1,3 +1,7 @@
+"""
+This module contains data tables and related methods.
+"""
+
 from datetime import datetime
 
 from flask_login import UserMixin
