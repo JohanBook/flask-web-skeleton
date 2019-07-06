@@ -20,8 +20,10 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    from jedi.errors.handlers import errors
     from jedi.main.routes import main
     from jedi.users.routes import users
+    app.register_blueprint(errors)
     app.register_blueprint(main)
     app.register_blueprint(users)
 
