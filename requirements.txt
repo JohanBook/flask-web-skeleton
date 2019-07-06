@@ -1,9 +1,11 @@
+black
 flask
 flask-bcrypt
 flask-login
 flask-mail
 flask-sqlalchemy
 flask-wtf
+isort
 itsdangerous
 numpy
 Pillow
