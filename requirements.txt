@@ -1,8 +1,10 @@
 flask
 flask-bcrypt
 flask-login
+flask-mail
 flask-sqlalchemy
 flask-wtf
+itsdangerous
 numpy
 Pillow
 wtforms

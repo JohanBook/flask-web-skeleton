@@ -1,12 +1,12 @@
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_user, current_user, logout_user, login_required
+from flask_mail import Message
 import os
 import secrets
 from PIL import Image
 
-from jedi import app, db, bcrypt
+from jedi import app, db, bcrypt, forms, mail
 from jedi.analyze import formated_analysis
-from jedi.forms import RegistrationForm, LoginForm, UpdateAccount, AnalyzeForm
 from jedi.models import User
 
 posts = [
@@ -31,6 +31,17 @@ def save_picture(form_picture, directory='profile_pics', output_size=(125, 125))
     return filename
 
 
+def send_reset_email(user):
+    token = user.get_reset_token()
+    msg = Message(
+        '[JEDI] Password reset request',
+        sender='noreply@demo.com',
+        recipients=[user.email]
+    )
+    msg.body = f"To reset your password, visit {url_for('reset_token', token=token, _external=True)}"
+    mail.send(msg)
+
+
 @app.route("/")
 @app.route("/home")
 def home():
@@ -45,7 +56,7 @@ def about():
 @app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
-    form = UpdateAccount()
+    form = forms.UpdateAccount()
     if form.validate_on_submit():
         if form.picture.data:
             picture_file = save_picture(form.picture.data)
@@ -70,7 +81,7 @@ def account():
 @app.route("/analyze", methods=['GET', 'POST'])
 @login_required
 def analyze():
-    form = AnalyzeForm()
+    form = forms.AnalyzeForm()
     image_data = None
     image_path = None
     if form.picture.data:
@@ -85,7 +96,7 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
 
-    form = LoginForm()
+    form = forms.LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
@@ -103,7 +114,7 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
 
-    form = RegistrationForm()
+    form = forms.RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
@@ -118,3 +129,34 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+
+@app.route("/reset_password", methods=['GET', 'POST'])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = forms.RequestResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        send_reset_email(user)
+        flash('An email with a reset link has been sent to you', 'info')
+        return redirect(url_for('login'))
+    return render_template('reset_request.html', title='Reset pasword', form=form)
+
+
+@app.route("/reset_password/<token>", methods=['GET', 'POST'])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    user = User.verify_reset_token(token)
+    if user is None:
+        flash('Invalid url', 'warning')
+        return redirect(url_for('reset_request'))
+    form = forms.ResetPasswordForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user.password = hashed_password
+
+        db.session.commit()
+        flash(f'Password have been reset', 'success')
+    return render_template('reset_token.html', title='Reset password', form=form)

@@ -98,3 +98,34 @@ class AnalyzeForm(FlaskForm):
     submit = SubmitField(
         'Analyze'
     )
+
+
+class RequestResetForm(FlaskForm):
+    email = StringField(
+        'Email',
+        validators=[DataRequired(), Email()]
+    )
+    submit = SubmitField(
+        'Request password reset'
+    )
+
+    def validate_email(self, email):
+        if not User.query.filter_by(email=email.data).first():
+            raise ValidationError(
+                f'Email not found'
+            )
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField(
+        'Password',
+        validators=[DataRequired()]
+    )
+    confirm_password = PasswordField(
+        'Confirm password',
+        validators=[DataRequired(), EqualTo('password')]
+    )
+    submit = SubmitField(
+        'Reset password'
+    )
+
