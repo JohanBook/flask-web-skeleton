@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, url_for
-from flask_login import login_required
+from flask import Blueprint, render_template, url_for, flash, redirect
+from flask_login import login_required, current_user
 from PIL import Image
 
 from jedi import utils
@@ -8,18 +8,11 @@ from jedi.main import forms
 
 main = Blueprint("main", __name__)
 
-posts = [
-    {
-        "author": "JEDI",
-        "content": "This is a project for Johan to learn Flask.",
-    }
-]
-
 
 @main.route("/")
 @main.route("/home")
 def home():
-    return render_template("home.html", posts=posts)
+    return render_template("home.html")
 
 
 @main.route("/about")
@@ -31,6 +24,15 @@ def about():
 @login_required
 def analyze():
     form = forms.AnalyzeForm()
+    if form.validate_on_submit():
+        print('Detected submit')
+        if current_user.check_credit(1):
+            current_user.withdraw_credit(1)
+            print('Withdrawn credit')
+        else:
+            flash('Your credit is too low. Please get more to use this functionality', 'danger')
+            return redirect(url_for('main.analyze'))
+
     image_data = None
     image_path = None
     if form.picture.data:
@@ -46,3 +48,9 @@ def analyze():
         image_data=image_data,
         image_path=image_path,
     )
+
+
+@main.route("/credits")
+@login_required
+def credits():
+    return render_template('credits.html')

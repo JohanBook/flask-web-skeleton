@@ -32,4 +32,12 @@ def create_app(config_class=Config):
     login_manger.init_app(app)
     mail.init_app(app)
 
+    with app.app_context():
+        tables = db.get_tables_for_bind()
+        if not tables:
+            print(f'Unable to locate tables, got {tables}. Creating new tables.')
+            db.create_all()
+        else:
+            print(f'Found tables: {tables}')
+
     return app
