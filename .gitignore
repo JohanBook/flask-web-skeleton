@@ -1,4 +1,7 @@
 **__pycache_**
+*/static/*
+.idea/
+*.db
 *.out
 *.pyc
 *.swp
