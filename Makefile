@@ -11,10 +11,6 @@ format:
 install:
 	pip install -r requirements.txt
 
-.PHONY: reset
-reset:
-	python -c "from flask_blog import db; db.drop_all(); db.create_all()"
-
 .PHONY: test
 test:
 	nosetests jedi/
