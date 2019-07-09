@@ -29,6 +29,8 @@ def account():
         "static", filename="profile_pics/" + current_user.image_file
     )
     purchases = Purchase.query.all()
+    if not current_user.confirmed_email:
+        flash('Your email is not confirmed. Please confirm it to use JEDI services', 'warning')
     return render_template("account.html", image_file=image_file, form=form, purchases=purchases)
 
 
@@ -73,7 +75,7 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
-        flash(f"Account created for {form.username.data}", "success")
+        flash(f"Account successfully created for {form.username.data}", "success")
         return redirect(url_for("users.login"))
     return render_template("register.html", title="Register", form=form)
 

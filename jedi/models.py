@@ -22,12 +22,15 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    confirmed_email = db.Column(db.Boolean(), nullable=False, default=False)
     image_file = db.Column(
         db.String(20), nullable=False, default="default.png"
     )
     password = db.Column(db.String(60), nullable=False)
     credit = db.Column(db.Integer, nullable=False, default=100)
     purchases = db.relationship('Purchase', backref='owner', lazy=True)
+
+    # privilege = db.Column(db.Integer, nullable=False, default=0)
 
     def check_credit(self, amount):
         return self.credit >= amount
