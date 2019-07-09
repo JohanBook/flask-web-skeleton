@@ -2,7 +2,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from jedi import bcrypt, db, utils
-from jedi.models import User, Purchase
+from jedi.models import Purchase, User
 from jedi.users import forms
 
 users = Blueprint("users", __name__)
@@ -30,8 +30,13 @@ def account():
     )
     purchases = Purchase.query.all()
     if not current_user.confirmed_email:
-        flash('Your email is not confirmed. Please confirm it to use JEDI services', 'warning')
-    return render_template("account.html", image_file=image_file, form=form, purchases=purchases)
+        flash(
+            "Your email is not confirmed. Please confirm it to use JEDI services",
+            "warning",
+        )
+    return render_template(
+        "account.html", image_file=image_file, form=form, purchases=purchases
+    )
 
 
 @users.route("/login", methods=["GET", "POST"])
@@ -75,7 +80,9 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
-        flash(f"Account successfully created for {form.username.data}", "success")
+        flash(
+            f"Account successfully created for {form.username.data}", "success"
+        )
         return redirect(url_for("users.login"))
     return render_template("register.html", title="Register", form=form)
 

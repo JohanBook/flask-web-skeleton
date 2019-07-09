@@ -3,6 +3,7 @@ This module contains data tables and related methods.
 """
 
 from datetime import datetime
+
 from flask import current_app, url_for
 from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -19,6 +20,7 @@ class User(db.Model, UserMixin):
     """
     Table for a user.
     """
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -28,7 +30,7 @@ class User(db.Model, UserMixin):
     )
     password = db.Column(db.String(60), nullable=False)
     credit = db.Column(db.Integer, nullable=False, default=100)
-    purchases = db.relationship('Purchase', backref='owner', lazy=True)
+    purchases = db.relationship("Purchase", backref="owner", lazy=True)
 
     # privilege = db.Column(db.Integer, nullable=False, default=0)
 
@@ -49,7 +51,7 @@ class User(db.Model, UserMixin):
         return User.query.get(user_id)
 
     def withdraw_credit(self, amount):
-        self.credit = self.credit- amount
+        self.credit = self.credit - amount
         db.session.commit()
 
     def __repr__(self):
@@ -60,13 +62,12 @@ class Purchase(db.Model):
     """
     Table for purchases
     """
+
     id = db.Column(db.Integer, primary_key=True)
     address = db.Column(db.String(100), nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    image_file = db.Column(
-        db.String(20), nullable=False
-    )
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    image_file = db.Column(db.String(20), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
     def __repr__(self):
         return f"Purchase('{self.owner}', '{self.address}', '{self.date}')"

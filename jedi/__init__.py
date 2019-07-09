@@ -6,7 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 from jedi.config import Config
 
-
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 mail = Mail()
@@ -23,6 +22,7 @@ def create_app(config_class=Config):
     from jedi.errors.handlers import errors
     from jedi.main.routes import main
     from jedi.users.routes import users
+
     app.register_blueprint(errors)
     app.register_blueprint(main)
     app.register_blueprint(users)
@@ -35,10 +35,12 @@ def create_app(config_class=Config):
     with app.app_context():
         tables = db.get_tables_for_bind()
         if not tables:
-            print(f'Unable to locate tables, got {tables}. Creating new tables.')
+            print(
+                f"Unable to locate tables, got {tables}. Creating new tables."
+            )
 
         else:
-            print(f'Found tables: {tables}')
+            print(f"Found tables: {tables}")
         db.create_all()
 
     return app
