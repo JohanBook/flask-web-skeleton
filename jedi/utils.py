@@ -8,12 +8,22 @@ from PIL import Image
 from jedi import mail
 
 
+def random_hex(length=8):
+    return secrets.token_hex(length)
+
+
+def get_extension(filename):
+    _, extension = os.path.splitext(filename)
+    return extension
+
+
 def save_picture(
-    form_picture, directory="profile_pics", output_size=(125, 125)
+    form_picture, directory="profile_pics", output_size=(125, 125), hex=None
 ):
-    random_hex = secrets.token_hex(8)
-    _, extension = os.path.splitext(form_picture.filename)
-    filename = random_hex + extension
+    if not hex:
+        hex = secrets.token_hex(8)
+    extension = get_extension(form_picture.filename)
+    filename = hex + extension
     path = os.path.join(current_app.root_path, "static", directory, filename)
 
     img = Image.open(form_picture)

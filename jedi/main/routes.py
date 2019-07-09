@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, url_for, flash, redirect
+from flask import Blueprint, render_template, url_for, flash, redirect, abort
 from flask_login import login_required, current_user
 from PIL import Image
 
-from jedi import utils
+from jedi import db, utils
 from jedi.analyze import formated_analysis
 from jedi.main import forms
+from jedi.models import Purchase
 
 main = Blueprint("main", __name__)
 
@@ -25,29 +26,39 @@ def about():
 def analyze():
     form = forms.AnalyzeForm()
     if form.validate_on_submit():
-        print('Detected submit')
         if current_user.check_credit(1):
             current_user.withdraw_credit(1)
-            print('Withdrawn credit')
+            address = utils.random_hex()
+            image_file = utils.save_picture(
+                form.picture.data, directory="analyzed", output_size=None, hex=address
+            )
+            purchase = Purchase(address=address, owner=current_user, image_file=image_file)
+            db.session.add(purchase)
+            db.session.commit()
+
+            return redirect(url_for('main.view_order', order=purchase.address))
         else:
             flash('Your credit is too low. Please get more to use this functionality', 'danger')
             return redirect(url_for('main.analyze'))
 
-    image_data = None
-    image_path = None
-    if form.picture.data:
-        image_path = utils.save_picture(
-            form.picture.data, directory="analyzed", output_size=None
-        )
-        image_path = url_for("static", filename="analyzed/" + image_path)
-        image_data = formated_analysis(Image.open(form.picture.data))
     return render_template(
         "analyze.html",
         title="Analyze",
-        form=form,
-        image_data=image_data,
-        image_path=image_path,
+        form=form
     )
+
+
+@main.route("/analyze/<order>", methods=["GET", "POST"])
+@login_required
+def view_order(order):
+    purchase = Purchase.query.filter_by(address=order).first()
+    if purchase and purchase.owner == current_user:
+        image_file = url_for(
+            "static", filename="analyzed/" + purchase.image_file
+        )
+        return render_template('order.html', purchase=purchase, image_file=image_file, image_data={})
+    else:
+        abort(404)
 
 
 @main.route("/credits")

@@ -55,5 +55,21 @@
             {{ form.submit(class="btn btn-outline-info") }}
         </div>
       </form>
+
+      <legend class="border-bottom mb-4">Purchases</legend>
+      {% if purchases %}
+        {% for purchase in purchases %}
+          <article class="media content-section">
+            <div class="media-body">
+              <div class="article-metadata">
+               <small class="text-muted">{{ purchase.date.strftime('%Y-%m-%d') }}</small>
+              </div>
+              <h2><a class="article-title" href="{{ url_for('main.view_order', order=purchase.address) }}">{{ purchase.address }}</a></h2>
+            </div>
+          </article>
+        {% endfor %}
+      {% else %}
+        <p>You have not done any orders yet.</p>
+      {% endif %}
     </div>
 {% endblock content%}

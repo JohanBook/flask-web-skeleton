@@ -36,8 +36,9 @@ def create_app(config_class=Config):
         tables = db.get_tables_for_bind()
         if not tables:
             print(f'Unable to locate tables, got {tables}. Creating new tables.')
-            db.create_all()
+
         else:
             print(f'Found tables: {tables}')
+        db.create_all()
 
     return app

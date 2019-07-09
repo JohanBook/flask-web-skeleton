@@ -2,7 +2,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from jedi import bcrypt, db, utils
-from jedi.models import User
+from jedi.models import User, Purchase
 from jedi.users import forms
 
 users = Blueprint("users", __name__)
@@ -28,13 +28,14 @@ def account():
     image_file = url_for(
         "static", filename="profile_pics/" + current_user.image_file
     )
-    return render_template("account.html", image_file=image_file, form=form)
+    purchases = Purchase.query.all()
+    return render_template("account.html", image_file=image_file, form=form, purchases=purchases)
 
 
 @users.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for("home"))
+        return redirect(url_for("main.home"))
 
     form = forms.LoginForm()
     if form.validate_on_submit():
