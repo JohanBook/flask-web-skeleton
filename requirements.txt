@@ -10,6 +10,7 @@ Flask==1.1.0
 Flask-Bcrypt==0.7.1
 Flask-Login==0.4.1
 Flask-Mail==0.9.1
+flask-migrate
 Flask-SQLAlchemy==2.4.0
 Flask-WTF==0.14.2
 isort==4.3.21

@@ -2,6 +2,7 @@ from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 from jedi.config import Config
@@ -31,6 +32,8 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     login_manger.init_app(app)
     mail.init_app(app)
+
+    migrate = Migrate(app, db)
 
     with app.app_context():
         tables = db.get_tables_for_bind()
