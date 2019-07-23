@@ -5,7 +5,7 @@ from flask import current_app, url_for
 from flask_mail import Message
 from PIL import Image
 
-from jedi import mail
+from flask_web_skeleton import mail
 
 
 def random_hex(length=8):
@@ -35,11 +35,12 @@ def save_picture(
 
 
 def send_reset_email(user):
-    token = user.get_reset_token()
+    token = user.password_reset_request()
     msg = Message(
-        "[JEDI] Password reset request",
+        "[flask_web_skeleton] Password reset request",
         sender="noreply@demo.com",
         recipients=[user.email],
     )
-    msg.body = f"To reset your password, visit {url_for('reset_token', token=token, _external=True)}"
-    mail.send(msg)
+    msg.body = f"To reset your password, visit {url_for('users.reset_token', token=token, _external=True)}"
+    print(msg.body)
+    # mail.send(msg)

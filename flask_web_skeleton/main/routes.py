@@ -2,10 +2,10 @@ from flask import Blueprint, abort, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
 from PIL import Image
 
-from jedi import db, utils
-from jedi.analyze import formated_analysis
-from jedi.main import forms
-from jedi.models import Purchase
+from flask_web_skeleton import db, utils
+from flask_web_skeleton.analyze import formated_analysis
+from flask_web_skeleton.main import forms
+from flask_web_skeleton.models import Purchase
 
 main = Blueprint("main", __name__)
 

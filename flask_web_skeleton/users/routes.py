@@ -1,11 +1,15 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
-from jedi import bcrypt, db, utils
-from jedi.models import Purchase, User
-from jedi.users import forms
+from flask_web_skeleton import db, utils
+from flask_web_skeleton.models import Purchase, User
+from flask_web_skeleton.users import forms
 
 users = Blueprint("users", __name__)
+
+
+# Attackers will be able to modify the tokens, so don't store the user account information or timeout information
+# in them. They should be an unpredictable random binary blob used only to identify a record in a database table
 
 
 @users.route("/account", methods=["GET", "POST"])
@@ -31,7 +35,7 @@ def account():
     purchases = Purchase.query.all()
     if not current_user.confirmed_email:
         flash(
-            "Your email is not confirmed. Please confirm it to use JEDI services",
+            "Your email is not confirmed. Please confirm it to use flask_web_skeleton services",
             "warning",
         )
     return render_template(
@@ -47,9 +51,8 @@ def login():
     form = forms.LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(
-            user.password, form.password.data
-        ):
+        if user and user.check_password(form.password.data):
+            user.login()
             login_user(user, remember=form.remember.data)
             flash(f"Logged in as {user.username}", "success")
             next_page = request.args.get("next")
@@ -70,20 +73,19 @@ def register():
 
     form = forms.RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(
-            form.password.data
-        ).decode("utf-8")
         user = User(
             username=form.username.data,
             email=form.email.data,
-            password=hashed_password,
+            password=form.password.data,
         )
         db.session.add(user)
         db.session.commit()
         flash(
             f"Account successfully created for {form.username.data}", "success"
         )
-        return redirect(url_for("users.login"))
+
+        login_user(user)  # also login in database
+        return redirect(url_for("main.home"))
     return render_template("register.html", title="Register", form=form)
 
 
@@ -104,7 +106,7 @@ def reset_request():
         flash("An email with a reset link has been sent to you", "info")
         return redirect(url_for("users.login"))
     return render_template(
-        "reset_request.html", title="Reset pasword", form=form
+        "reset_request.html", title="Reset password", form=form
     )
 
 
@@ -112,19 +114,24 @@ def reset_request():
 def reset_token(token):
     if current_user.is_authenticated:
         return redirect(url_for("main.home"))
-    user = User.verify_reset_token(token)
+
+    user = User.verify_password_reset(token)
     if user is None:
         flash("Invalid url", "warning")
         return redirect(url_for("users.reset_request"))
+
     form = forms.ResetPasswordForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(
-            form.password.data
-        ).decode("utf-8")
-        user.password = hashed_password
-
-        db.session.commit()
+        user.set_password(form.password.data)
         flash(f"Password have been reset", "success")
+        return redirect(url_for("main.home"))
+
     return render_template(
         "reset_token.html", title="Reset password", form=form
     )
+
+
+@users.route("/user/<username>")
+@login_required
+def user(username):
+    return render_template("reset_request.html")

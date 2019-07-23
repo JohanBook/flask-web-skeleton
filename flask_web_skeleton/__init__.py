@@ -5,7 +5,7 @@ from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-from jedi.config import Config
+from flask_web_skeleton.config import Config
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -20,10 +20,12 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    from jedi.errors.handlers import errors
-    from jedi.main.routes import main
-    from jedi.users.routes import users
+    from flask_web_skeleton.errors.handlers import errors
+    from flask_web_skeleton.api.routes import api
+    from flask_web_skeleton.main.routes import main
+    from flask_web_skeleton.users.routes import users
 
+    app.register_blueprint(api)
     app.register_blueprint(errors)
     app.register_blueprint(main)
     app.register_blueprint(users)

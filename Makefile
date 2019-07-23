@@ -1,11 +1,11 @@
 .PHONY: env
 env:
-	conda create -q -n jedi python=3.7 pip
+	conda create -q -n flask_web_skeleton python=3.7 pip
 
 .PHONY: format
 format:
-	isort -rc --atomic jedi/
-	black --line-length 79 jedi/
+	isort -rc --atomic flask_web_skeleton/
+	black --line-length 79 flask_web_skeleton/
 
 .PHONY: install
 install:
@@ -13,4 +13,4 @@ install:
 
 .PHONY: test
 test:
-	nosetests jedi/
+	nosetests flask_web_skeleton/

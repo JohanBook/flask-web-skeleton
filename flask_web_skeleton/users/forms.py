@@ -10,7 +10,7 @@ from wtforms.validators import (
     ValidationError,
 )
 
-from jedi.models import User
+from flask_web_skeleton.models import User
 
 
 class RegistrationForm(FlaskForm):
